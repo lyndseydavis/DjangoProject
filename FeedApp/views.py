@@ -23,9 +23,8 @@ def index(request):
 @login_required
 def profile(request):
     # do they have a profile?
-    profile = Profile.objects.filter(
-        user=request.user
-    )  # can't use get() bc doesnt work with exists
+    # can't use get() bc doesnt work with exists
+    profile = Profile.objects.filter(user=request.user)
     if not profile.exists():
         Profile.objects.create(user=request.user)
     # now that we know they have a profile we can get them

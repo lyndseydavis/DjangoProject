@@ -7,9 +7,9 @@
     <p>My Profile:</p>
 </h1>
 
-<form action="{% url 'FeedApp:profile' %}" methood="post">
+<form action="{% url 'FeedApp:profile' %}" methood='post'>
     {% csrf_token %}
-    {{ form |crispy }}
+    {{ form |crispy}}
     <br><br>
     <button name="submit" class="btn btn-outline-primary">Update</button>
 </form>
