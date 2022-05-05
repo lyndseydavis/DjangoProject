@@ -42,3 +42,24 @@ def profile(request):
 
     context = {"form": form}
     return render(request, "FeedApp/profile.html", context)
+
+
+@login_required
+# see all post, likes, and comments
+def myfeed(request):
+    comment_count_list = []
+    like_count_list = []
+    # grab all posts for this user by filtering username and sort by newest post
+    posts = Post.objects.filter(username=request.user).order_by("-date_posted")
+    # get like and comments for each post
+    for p in posts:
+        c_count = Comment.objects.filter(post=p).count()
+        l_count = Like.objects.filter(post=p).count()
+        comment_count_list.append(c_count)
+        like_count_list.append(l_count)
+
+    # zip all info together for easier passing to context
+    zipped_list = zip(posts, comment_count_list, like_count_list)
+
+    context = {"posts": posts, "zipped_list": zipped_list}
+    return render(request, "FeedApp/myfeed.html", context)
