@@ -30,3 +30,16 @@ def profile(request):
         Profile.objects.create(user=request.user)
     # now that we know they have a profile we can get them
     profile = Profile.objects.get(user=request.user)
+
+    # load this users specific profile so they can add/edit their info (GET)
+    if request.method != "POST":
+        form = ProfileForm(instance=profile)
+    # trying to save to database (POST)
+    else:
+        form = ProfileForm(instance=profile, data=request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("FeedApp:profile")
+
+    context = {"form": form}
+    return render(request, "FeedApp/profile.html", context)
