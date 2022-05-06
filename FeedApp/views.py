@@ -63,3 +63,23 @@ def myfeed(request):
 
     context = {"posts": posts, "zipped_list": zipped_list}
     return render(request, "FeedApp/myfeed.html", context)
+
+
+# create posts
+@login_required
+def new_post(request):
+    # if a get request then want an empty form for a post
+    # if a post request then we want to send to db
+    if request.method != "POST":
+        form = PostForm()
+    else:
+        form = PostForm(request.POST, request.FILES)
+        if form.is_valid():
+            # save but don't commit to db yet bc we want to assign to a user
+            new_post = form.save(commit=False)
+            new_post.username = request.user
+            new_post.save()
+            return redirect("FeedApp:myfeed")
+
+    context = {"form": form}
+    return render(request, "FeedApp/new_post.html", context)

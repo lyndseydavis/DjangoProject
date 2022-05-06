@@ -5,12 +5,14 @@
 {% block content %}
 
 <h1>
-    <p>My Posts:</p>
+    <p>My Feed</p>
 </h1>
+
+<h3><a href="{% url 'FeedApp:new_post' %}">Add New Post</a></h3>
 
 <table style="font-size: 25px; width: 100%;">
 
-    {% for p,c.l in zipped_list %}
+    {% for p,c,l in zipped_list %}
     <tr style="border: 1px solid black; padding: 6px;">
         <td>{{p.username}}:&nbsp {{ p }} <br>
             {% if p.image %}
@@ -19,7 +21,7 @@
         </td>
     </tr>
     <tr style="border: 1px solid black; padding: 6px;">
-        <td>{{p.dateposted}}</td>
+        <td>{{p.date_posted}}</td>
         <td>Likes: &nbsp {{l}} &nbsp&nbsp&nbsp</td>
         <td>Comments: &nbsp {{c}} &nbsp&nbsp&nbsp</td>
     </tr>
