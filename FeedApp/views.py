@@ -132,7 +132,7 @@ def friendsfeed(request):
         like_already_exist = Like.objects.filter(
             post_id=post_to_like, username=request.user
         )
-        if not like_already_exist():
+        if not like_already_exist.exists():
             Like.objects.create(post_id=post_to_like, username=request.user)
             return redirect("FeedApp:friendsfeed")
 
