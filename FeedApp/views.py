@@ -138,3 +138,72 @@ def friendsfeed(request):
 
     context = {"posts": posts, "zipped_list": zipped_list}
     return render(request, "FeedApp/friendsfeed.html", context)
+
+
+# handle friend requests
+@login_required
+def friends(request):
+    # admin profile and user profile
+    admin_profile = Profile.objects.get(user=1)
+    user_profile = Profile.objects.get(user=request.user)
+
+    # get a list of user friends
+    user_friends = user_profile.friends.all()
+    user_friends_profiles = Profile.objects.filter(user__in=user_friends)
+
+    # list of sent friend requests
+    user_relationships = Relationship.objects.filter(sender=user_profile)
+    request_sent_profiles = user_relationships.values("receiver")
+
+    # list of who we can send a friend request to - everyone in system that is not a friend or hasn't been sent one already
+    all_profiles = (
+        Profile.objects.exclue(user=request.user)
+        .exclude(id__in=user_friends_profiles)
+        .exclude(id__in=request_sent_profiles)
+    )
+
+    # get friend requests received
+    request_received_profiles = Relationship.objects.filter(
+        receiver=user_profile, status="sent"
+    )
+
+    # create relationship with admin when user first joins so admin is friends with everyone
+    if not user_relationships.exists():
+        Relationship.objects.create(
+            sender=user_profile, receiver=admin_profile, status="sent"
+        )
+
+    # which submit button was pressed - send or accept
+    # all send requests
+    if request.method == "POST" and request.POST.get("send_requests"):
+        receivers = request.POST.getlist("send_requests")
+        for receiver in receivers:
+            receiver_profile = Profile.objects.get(id=receiver)
+            Relationship.objects.create(
+                sender=user_profile, receiver=receiver_profile, status="sent"
+            )
+        return redirect("FeedApp:friends")
+
+    # all requests received
+    if request.method == "POST" and request.POST.get("receive_requests"):
+        senders = request.POST.getlist("friends_requests")
+        for sender in senders:
+            # update relationship model for the sender to status "accepted"
+            Relationship.objects.filter(id=sender).update(status="accepted")
+
+            # create relationship object to access the sender's user id
+            # add that user id to the friends list of the user
+            relationship_obj = Relationship.objects.get(id=sender)
+            user_profile.friends.add(relationship_obj.sender.user)
+
+            # add user to the friends list of sender profile
+            relationship_obj.sender.friends.add(request.user)
+
+    context = {
+        "user_friends_profiles": user_friends_profiles,
+        "user_relationships": user_relationships,
+        "all profiles": all_profiles,
+        "request_received_profiles": request_received_profiles,
+    }
+
+    return render(request, "FeedApp/friends.html", context)
