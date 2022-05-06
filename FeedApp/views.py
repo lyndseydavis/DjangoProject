@@ -157,7 +157,7 @@ def friends(request):
 
     # list of who we can send a friend request to - everyone in system that is not a friend or hasn't been sent one already
     all_profiles = (
-        Profile.objects.exclue(user=request.user)
+        Profile.objects.exclude(user=request.user)
         .exclude(id__in=user_friends_profiles)
         .exclude(id__in=request_sent_profiles)
     )
@@ -186,7 +186,7 @@ def friends(request):
 
     # all requests received
     if request.method == "POST" and request.POST.get("receive_requests"):
-        senders = request.POST.getlist("friends_requests")
+        senders = request.POST.getlist("receive_requests")
         for sender in senders:
             # update relationship model for the sender to status "accepted"
             Relationship.objects.filter(id=sender).update(status="accepted")
@@ -198,11 +198,12 @@ def friends(request):
 
             # add user to the friends list of sender profile
             relationship_obj.sender.friends.add(request.user)
+        return redirect("FeedApp:friends")
 
     context = {
         "user_friends_profiles": user_friends_profiles,
         "user_relationships": user_relationships,
-        "all profiles": all_profiles,
+        "all_profiles": all_profiles,
         "request_received_profiles": request_received_profiles,
     }
 
