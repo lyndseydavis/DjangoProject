@@ -87,7 +87,7 @@ def new_post(request):
 
 # add comments
 @login_required
-def comments(request, post_id):
+def new_comment(request, postid):
     # want to see if someone clicked on the comment button
     # have to process everything manually in html since we are not using a form
     # if request is a post method and button has been clicked to submit
@@ -95,14 +95,14 @@ def comments(request, post_id):
         comment = request.POST.get("comment")
         # create a new row in Comment model for db
         Comment.objects.create(
-            post_id=post_id,
+            post_id=postid,
             username=request.user,
             text=comment,
             date_added=date.today(),
         )
 
-    comments = Comment.objects.filter(post=post_id)
-    post = Post.objects.get(id=post_id)
+    comments = Comment.objects.filter(post=postid)
+    post = Post.objects.get(id=postid)
 
     context = {"post": post, "comments": comments}
     return render(request, "FeedApp/comments.html", context)
